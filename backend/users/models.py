@@ -3,35 +3,15 @@ from django.db import models
 
 
 class User(AbstractUser):
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+
     email = models.EmailField(
         max_length=254,
         unique=True,
         verbose_name='Почта',
         help_text='Введите адрес электронной почты'
     )
-    username = models.CharField(
-        max_length=150,
-        unique=True,
-        blank=False,
-        verbose_name='Имя пользователя',
-        help_text=(
-            'Обязательное. 150 символов или меньше. '
-            'Только буквы, цифры и "@/./+/-/_".'
-        )
-    )
-    first_name = models.CharField(
-        max_length=150,
-        blank=False,
-        verbose_name='Имя'
-    )
-    last_name = models.CharField(
-        max_length=150,
-        blank=False,
-        verbose_name='Фамилия'
-    )
-
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
     class Meta:
         verbose_name = 'Пользователь'
