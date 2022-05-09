@@ -9,6 +9,7 @@ class IngredientsInRecipeInline(admin.TabularInline):
     extra = 1
 
 
+@admin.register(IngredientsInRecipe)
 class IngredientsInRecipeAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
@@ -19,6 +20,7 @@ class IngredientsInRecipeAdmin(admin.ModelAdmin):
     search_fields = ('recipe__name', 'ingredient__name')
 
 
+@admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
@@ -29,6 +31,7 @@ class IngredientAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
+@admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
@@ -37,6 +40,7 @@ class TagAdmin(admin.ModelAdmin):
     )
 
 
+@admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
@@ -51,6 +55,7 @@ class RecipeAdmin(admin.ModelAdmin):
         return obj.in_favorite.all().count()
 
 
+@admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
@@ -59,20 +64,10 @@ class FavoriteAdmin(admin.ModelAdmin):
     )
 
 
+@admin.register(ShoppingList)
 class ShoppingListAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
         'user',
         'recipe'
     )
-
-
-admin.site.register(Ingredient, IngredientAdmin)
-admin.site.register(Tag, TagAdmin)
-admin.site.register(Recipe, RecipeAdmin)
-admin.site.register(Favorite, FavoriteAdmin)
-admin.site.register(ShoppingList, ShoppingListAdmin)
-admin.site.register(
-    IngredientsInRecipe,
-    IngredientsInRecipeAdmin
-)
