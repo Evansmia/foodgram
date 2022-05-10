@@ -2,19 +2,22 @@ version: '2.2'
 services:
 
   db:
-    image: postgres:13.0-alpine
-    volumes:
-      - /var/lib/postgresql/data/
     env_file:
       - ./.env
+    image: postgres:12.4
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    restart: always
+
   frontend:
     image: miaevns/foodgram_frontend:latest
     volumes:
-      - ../frontend/:/app/result_build/
+      - ./frontend/:/app/result_build/
     depends_on:
       - db
+
   backend:
-    image: miaevns/foodgram_backend:latest
+    image: miaevns/foodgram:latest
     restart: always
     volumes:
       - static_value:/code/static/
@@ -22,20 +25,24 @@ services:
     depends_on:
       - db
     env_file:
-      - ./.env 
+      - ./.env
+ 
   nginx:
-    image: nginx:1.19.3
+    image: nginx:1.19.6
     ports:
-      - "80:80"
+      - 80:80
     volumes:
+      - static_value:/static/
+      - media_value:/media/
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ../frontend/build:/usr/share/nginx/html/
-      - ../docs/:/usr/share/nginx/html/api/docs/
-      - static_value:/var/html/static/
-      - media_value:/var/html/media/
+      - ../docs/redoc.html:/usr/share/nginx/html/api/docs/redoc.html
+      - ../docs/openapi-schema.yml:/usr/share/nginx/html/api/docs/openapi-schema.yml
+    restart: always
     depends_on:
       - backend
       - frontend
+
 volumes:
   postgres_data:
   static_value:
