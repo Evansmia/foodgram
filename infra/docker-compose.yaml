@@ -8,11 +8,11 @@ services:
     env_file:
       - ./.env
   frontend:
-    image: senia0709/foodgram_frontend:latest
+    image: miaevns/foodgram_frontend:latest
     volumes:
       - ../frontend/:/app/result_build/
   backend:
-    image: senia0709/foodgram_backend:latest
+    image: miaevns/foodgram_backend:latest
     restart: always
     volumes:
       - static_value:/code/static/
