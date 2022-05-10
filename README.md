@@ -57,3 +57,7 @@ docker-compose exec backend python manage.py migrate
 docker-compose exec backend python manage.py createsuperuser
 
 docker-compose exec backend python manage.py collectstatic --no-input
+
+IP 84.201.155.233
+Логин администратора: admin
+Пароль: 123456
