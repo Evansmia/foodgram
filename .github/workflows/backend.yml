@@ -26,6 +26,7 @@ jobs:
         with:
           push: true
           context: backend/
+          file: backend/Dockerfile
           tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:latest
       - name: Push frontend
         uses: docker/build-push-action@v2 
