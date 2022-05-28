@@ -28,12 +28,14 @@ class IngredientsViewSet(ListAndRetriveViewSet):
     serializer_class = IngredientSerializer
     permission_classes = [permissions.AllowAny]
     filterset_class = IngredientFilter
+    pagination_class = None
 
 
 class TagsViewSet(ListAndRetriveViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = [permissions.AllowAny]
+    pagination_class = None
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
