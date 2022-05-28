@@ -1,8 +1,11 @@
 import os
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+from dotenv import load_dotenv
 
+load_dotenv()
+
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-pcgyo_ld+a*exn2r$_q%2ybvar4+0)3cor&#gxbuqo3f^f=o5)'
 
@@ -57,25 +60,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'foodgram.wsgi.application'
 
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
+        'NAME': os.getenv('DB_NAME', default='postgres'),
+        'USER': os.getenv('POSTGRES_USER', default='postgres'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='postgres'),
+        'HOST': os.getenv('DB_HOST', default='db'),
+        'PORT': os.getenv('DB_PORT', default=5432)
     }
 }
-
-# DATABASES = {
-    #'default': {
-        #'ENGINE': os.environ.get('ENGINE', default='django.db.backends.postgresql'),
-        #'NAME': os.environ.get('DB_NAME', default='postgres'),
-        #'USER': os.environ.get('POSTGRES_USER', default='postgres'),
-        #'PASSWORD': os.environ.get('POSTGRES_PASSWORD', default='postgres'),
-        #'HOST': os.environ.get('DB_HOST', default='db'),
-        #'PORT': os.environ.get('DB_PORT', default=5432)
-    #}
-#}
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
