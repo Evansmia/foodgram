@@ -4,11 +4,6 @@ from .models import (Favorite, Ingredient, IngredientsInRecipe,
                      Recipe, ShoppingList, Tag)
 
 
-class IngredientsInRecipeInline(admin.TabularInline):
-    model = Recipe.ingredients.through
-    extra = 1
-
-
 @admin.register(IngredientsInRecipe)
 class IngredientsInRecipeAdmin(admin.ModelAdmin):
     list_display = (
@@ -36,7 +31,6 @@ class TagAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
         'name',
-        'color',
         'slug'
     )
 
@@ -50,7 +44,6 @@ class RecipeAdmin(admin.ModelAdmin):
         'in_favorite'
     )
     list_filter = ['name', 'author', 'tags']
-    inlines = (IngredientsInRecipeInline,)
 
     def in_favorite(self, obj):
         return obj.in_favorite.all().count()

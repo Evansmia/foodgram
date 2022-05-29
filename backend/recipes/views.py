@@ -1,16 +1,19 @@
 from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import mixins, permissions, status, viewsets
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import (AllowAny, IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
+from rest_framework.serializers import ValidationError
 
 from foodgram.pagination import CustomPaginator
 
-from .filters import IngredientFilter, RecipeFilter
+from .filters import RecipeFilter
 from .models import (Favorite, Ingredient, IngredientsInRecipe,
                      Recipe, ShoppingList, Tag)
-from .permissions import IsOwnerOrReadOnly
+from .permissions import IsAdminOrOwner
 from .serializers import (AddRecipeSerializer, FavoriteSerializer,
                           IngredientSerializer, RecipeSerializer,
                           ShoppingListSerializer, TagSerializer)
@@ -26,22 +29,23 @@ class ListAndRetriveViewSet(
 class IngredientsViewSet(ListAndRetriveViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    permission_classes = [permissions.AllowAny]
-    filterset_class = IngredientFilter
+    permission_classes = (AllowAny,)
+    filter_backends = [DjangoFilterBackend]
+    search_fields = ('^name',)
     pagination_class = None
 
 
 class TagsViewSet(ListAndRetriveViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = (AllowAny,)
     pagination_class = None
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAdminOrOwner)
     pagination_class = CustomPaginator
     filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
@@ -51,42 +55,51 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return RecipeSerializer
         return AddRecipeSerializer
 
-    @action(detail=True, permission_classes=[permissions.IsAuthenticated])
-    def favorite(self, request, pk):
-        data = {'user': request.user.id, 'recipe': pk}
-        serializer = FavoriteSerializer(data=data,
-                                        context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    @favorite.mapping.delete
-    def delete_favorite(self, request, pk):
-        user = request.user
-        recipe = get_object_or_404(Recipe, id=pk)
-        favorite = get_object_or_404(Favorite, user=user, recipe=recipe)
-        favorite.delete()
+    @action(detail=False, methods=['POST', 'DELETE'],
+            permission_classes=[IsAuthenticated])
+    def favorite(self, request, id):
+        recipe = get_object_or_404(Recipe, id=id)
+        data = {'user': request.user.id, 'recipe': recipe.id}
+        serializer = FavoriteSerializer(data=data)
+        if request.method == 'POST':
+            if Favorite.objects.filter(
+                    recipe=recipe, user=request.user).exists():
+                raise ValidationError(
+                    'Данный рецепт уже есть в Вашем списке избранных!'
+                )
+            serializer.is_valid(raise_exception=True)
+            serializer.save(user=request.user, recipe=recipe)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if request.method == 'DELETE':
+            favorite = get_object_or_404(
+                Favorite, user=request.user, recipe__id=id
+            )
+            favorite.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, permission_classes=[permissions.IsAuthenticated])
-    def shopping_cart(self, request, pk):
-        data = {'user': request.user.id, 'recipe': pk}
-        serializer = ShoppingListSerializer(data=data,
-                                            context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    @shopping_cart.mapping.delete
-    def delete_shopping_cart(self, request, pk):
-        user = request.user
-        recipe = get_object_or_404(Recipe, id=pk)
-        shopping_list = get_object_or_404(ShoppingList,
-                                          user=user, recipe=recipe)
-        shopping_list.delete()
+    @action(detail=False, methods=['POST', 'DELETE'],
+            permission_classes=[IsAuthenticated])
+    def shopping_cart(self, request, id):
+        recipe = get_object_or_404(Recipe, id=id)
+        data = {'user': request.user.id, 'recipe': recipe.id}
+        serializer = ShoppingListSerializer(data=data)
+        if request.method == 'POST':
+            if ShoppingList.objects.filter(
+                    recipe=recipe, user=request.user).exists():
+                raise ValidationError(
+                    'Вы уже добавили данный рецепт в список покупок!'
+                )
+            serializer.is_valid(raise_exception=True)
+            serializer.save(user=request.user, recipe=recipe)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if request.method == 'DELETE':
+            shopping_list = get_object_or_404(
+                ShoppingList, user=request.user, recipe__id=id
+            )
+            shopping_list.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, permission_classes=[permissions.IsAuthenticated])
+    @action(detail=False, permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
         user_shopping_list = request.user.shopping_list.all()
         to_buy = get_ingredients_list(user_shopping_list)
