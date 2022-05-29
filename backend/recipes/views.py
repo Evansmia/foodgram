@@ -55,7 +55,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return RecipeSerializer
         return AddRecipeSerializer
 
-    @action(detail=False, methods=['POST', 'DELETE'],
+    @action(detail=True, methods=['POST', 'DELETE'],
             url_path=r'(?P<id>\d+)/favorite',
             permission_classes=[IsAuthenticated])
     def favorite(self, request, id):
