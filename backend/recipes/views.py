@@ -56,7 +56,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return AddRecipeSerializer
 
     @action(detail=True, methods=['POST', 'DELETE'],
-            url_path=r'(?P<id>\d+)/favorite/',
             permission_classes=[IsAuthenticated])
     def favorite(self, request, id):
         recipe = get_object_or_404(Recipe, id=id)
