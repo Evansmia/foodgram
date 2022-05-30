@@ -1,17 +1,20 @@
+from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from rest_framework import mixins, status, viewsets
+from djoser.views import UserViewSet
+from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from .models import Follow, User
+from .models import Follow
 from .serializers import (CustomUserSerializer, FollowListSerializer,
                           FollowSerializer)
 
+User = get_user_model()
 
-class UserViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
-                  mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+
+class CustomUserViewSet(UserViewSet):
     queryset = User.objects.all()
     serializer_class = CustomUserSerializer
     permission_classes = (IsAuthenticated,)
@@ -21,7 +24,8 @@ class UserViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
             return (AllowAny(),)
         return super().get_permissions()
 
-    @action(methods=['GET'], detail=False)
+    @action(methods=['GET'], detail=False,
+            permission_classes=[permissions.IsAuthenticated])
     def subscriptions(self, request):
         user_obj = User.objects.filter(following__user=request.user)
         paginator = PageNumberPagination()
@@ -32,11 +36,12 @@ class UserViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
         )
         return paginator.get_paginated_response(serializer.data)
 
-    @action(methods=['POST', 'DELETE'], detail=False)
+    @action(methods=['POST', 'DELETE'], detail=True,
+            permission_classes=[permissions.IsAuthenticated])
     def subscribe(self, request, id):
         following = get_object_or_404(User, id=id)
-        data = {'user': request.user.id, 'following': id}
-        serializer = FollowSerializer(data=data)
+        serializer = FollowSerializer(
+            data={'user': request.user.id, 'following': id})
         if request.method == 'POST':
             serializer.is_valid(raise_exception=True)
             serializer.save(user=request.user)
