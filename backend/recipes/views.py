@@ -63,7 +63,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             if Favorite.objects.filter(
                     recipe=recipe, user=request.user).exists():
                 raise ValidationError(
-                    'Данный рецепт уже есть в Вашем списке избранных!'
+                    'Данный рецепт уже есть в Вашем списке избранных.'
                 )
             serializer.is_valid(raise_exception=True)
             serializer.save(user=request.user, recipe=recipe)
