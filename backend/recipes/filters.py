@@ -1,5 +1,7 @@
 from enum import Enum
 from django_filters import rest_framework as filters
+from django_filters.filters import (AllValuesMultipleFilter,
+                                    NumberFilter)
 
 from .models import Recipe
 
@@ -15,13 +17,9 @@ class IsInCart(Enum):
 
 
 class RecipeFilter(filters.FilterSet):
-    tags = filters.AllValuesMultipleFilter(field_name='tags__slug')
-    is_favorited = filters.NumberFilter(method='get_favorite')
-    is_in_shopping_cart = filters.NumberFilter(method='get_shopping')
-
-    class Meta:
-        model = Recipe
-        fields = ('is_favorited', 'author', 'tags', 'is_in_shopping_cart')
+    tags = AllValuesMultipleFilter(field_name='tags__slug')
+    is_favorited = NumberFilter(method='get_favorite')
+    is_in_shopping_cart = NumberFilter(method='get_shopping')
 
     def get_favorite(self, queryset, name, value):
         user = self.request.user
@@ -34,3 +32,7 @@ class RecipeFilter(filters.FilterSet):
         if value == IsInCart.IN.value and user.is_authenticated:
             return queryset.filter(shoppinglist__user=user)
         return
+
+    class Meta:
+        model = Recipe
+        fields = ('is_favorited', 'author', 'tags', 'is_in_shopping_cart')
