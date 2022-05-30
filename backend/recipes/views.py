@@ -56,7 +56,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return AddRecipeSerializer
 
     @action(detail=True, methods=['POST', 'DELETE'],
-            url_path=r'(?P<id>\d+)/favorite',
+            url_path=r'(?P<id>\d+)/favorite/',
             permission_classes=[IsAuthenticated])
     def favorite(self, request, id):
         recipe = get_object_or_404(Recipe, id=id)
@@ -79,7 +79,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=['POST', 'DELETE'],
-            url_path=r'(?P<id>\d+)/shopping_cart',
+            url_path=r'(?P<id>\d+)/shopping_cart/',
             permission_classes=[IsAuthenticated])
     def shopping_cart(self, request, id):
         recipe = get_object_or_404(Recipe, id=id)
