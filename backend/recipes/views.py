@@ -8,8 +8,6 @@ from rest_framework.permissions import (AllowAny, IsAuthenticated,
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 
-from foodgram.pagination import CustomPaginator
-
 from .filters import RecipeFilter
 from .models import (Favorite, Ingredient, IngredientsInRecipe,
                      Recipe, ShoppingList, Tag)
@@ -46,7 +44,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = (IsAuthenticatedOrReadOnly, IsAdminOrOwner)
-    pagination_class = CustomPaginator
     filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
 
@@ -56,6 +53,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return AddRecipeSerializer
 
     @action(detail=True, methods=['POST', 'DELETE'],
+            url_path=r'(?P<id>\d+)/favorite/',
             permission_classes=[IsAuthenticated])
     def favorite(self, request, id):
         recipe = get_object_or_404(Recipe, id=id)
