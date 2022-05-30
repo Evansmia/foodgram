@@ -48,17 +48,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filterset_class = RecipeFilter
 
     def get_serializer_class(self):
-        if self.request.method == 'GET':
+        if self.request.method in ['GET']:
             return RecipeSerializer
         return AddRecipeSerializer
 
-    @action(detail=True, methods=['POST', 'DELETE'],
-            url_path=r'(?P<id>\d+)/favorite/',
+    @action(detail=False, methods=['POST', 'DELETE'],
+            url_path=r'(?P<id>\d+)/favorite',
             permission_classes=[IsAuthenticated])
     def favorite(self, request, id):
         recipe = get_object_or_404(Recipe, id=id)
-        data = {'user': request.user.id, 'recipe': recipe.id}
-        serializer = FavoriteSerializer(data=data)
+        serializer = FavoriteSerializer(
+            data={'user': request.user.id, 'recipe': recipe.id})
         if request.method == 'POST':
             if Favorite.objects.filter(
                     recipe=recipe, user=request.user).exists():
@@ -76,12 +76,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=['POST', 'DELETE'],
-            url_path=r'(?P<id>\d+)/shopping_cart/',
+            url_path=r'(?P<id>\d+)/shopping_cart',
             permission_classes=[IsAuthenticated])
     def shopping_cart(self, request, id):
         recipe = get_object_or_404(Recipe, id=id)
-        data = {'user': request.user.id, 'recipe': recipe.id}
-        serializer = ShoppingListSerializer(data=data)
+        serializer = ShoppingListSerializer(
+            data={'user': request.user.id, 'recipe': recipe.id})
         if request.method == 'POST':
             if ShoppingList.objects.filter(
                     recipe=recipe, user=request.user).exists():

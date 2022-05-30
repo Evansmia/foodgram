@@ -31,7 +31,7 @@ class RecipeFilter(filters.FilterSet):
         user = self.request.user
         if value == IsInCart.IN.value and user.is_authenticated:
             return queryset.filter(shoppinglist__user=user)
-        return
+        return queryset
 
     class Meta:
         model = Recipe
