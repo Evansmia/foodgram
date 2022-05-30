@@ -56,7 +56,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
             url_path=r'(?P<id>\d+)/favorite/',
             permission_classes=[IsAuthenticated])
     def favorite(self, request, id):
-        print("FOOBAR")
         recipe = get_object_or_404(Recipe, id=id)
         data = {'user': request.user.id, 'recipe': recipe.id}
         serializer = FavoriteSerializer(data=data)
