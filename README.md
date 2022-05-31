@@ -1,5 +1,8 @@
 # Foodgram - продуктовый помощник
-![example workflow](https://github.com/Evansmia/foodgram-project-react/actions/workflows/backend.yml/badge.svg)  
+
+## Доступен по адресу: **http://84.201.155.233/**
+### Администратор: почта - reviewer@reviewer.ru, пароль - 12345
+### Тестовый пользователь 1: Ivan1@yandex.ru/testuser1 и Тестовый пользователь 2: viki35@yandex.ru/testuser2 
 
 ## Стек технологий
 [![Python](https://img.shields.io/badge/-Python-464646?style=flat-square&logo=Python)](https://www.python.org/)
@@ -21,43 +24,55 @@
 - Docker
 - Works on Linux, Windows, macOS
 
-## Запуск проекта в контейнере
+## Запуск проекта на виртуальном сервере
 Клонируйте репозиторий и перейдите в него в командной строке.
 Создайте и активируйте виртуальное окружение:
 ```
 git clone https://github.com/Evansmia/foodgram-project-react.git
 ```
-Cоздать и открыть файл .env с переменными окружения:
+Создайте файл `.env` командой `touch .env` и добавьте в него переменные окружения для работы с базой данных:
+```bash
+DB_NAME=postgres # имя базы данных
+POSTGRES_USER=postgres # логин для подключения к базе данных
+POSTGRES_PASSWORD=postgres # пароль для подключения к БД (установите свой)
+DB_HOST=db # название сервиса (контейнера)
+DB_PORT=5432 # порт для подключения к БД
+
+````
+Скопируйте файлы `docker-compose.yml`, `nginx.conf` и `.env` из папки `/infra/` на Ваш виртуальный сервер:
+```bash
+scp <название файла> <username>@<server_ip>:/home/<username>/
+
 ```
-cd infra
-touch .env
+Далее зайдите на виртуальный сервер и подготовьте его к работе с проектом:
+ 
+```bash
+sudo apt update
+sudo apt upgrade -y
+sudo apt install python3-pip python3-venv git -y
+sudo apt install curl
+curl -fsSL https://get.docker.com -o get-docker.sh
+sh get-docker.sh 
+sudo apt install docker-compose
+
 ```
-Заполнить .env файл с переменными окружения:
+Теперь можно развернуть проект с помощью Docker используя контейнеризацию:
+
+```bash
+sudo docker-compose up -d --build
+
 ```
-echo DB_ENGINE=django.db.backends.postgresql >> .env
+Осталось выполнить миграции, подключить статику, создать профиль админастратора:
 
-echo DB_NAME=postgres >> .env
+```bash
+sudo docker exec -it <name или id контейнера backend> python manage.py migrate
+sudo docker exec -it <name или id контейнера backend> python manage.py collectstatic
+sudo docker exec -it <name или id контейнера backend> python manage.py createsuperuser
 
-echo POSTGRES_PASSWORD=postgres >> .env
-
-echo POSTGRES_USER=postgres  >> .env
-
-echo DB_HOST=db  >> .env
-
-echo DB_PORT=5432  >> .env
 ```
-Установить и запустить приложения в контейнерах (образ для контейнера web загружается из DockerHub):
-```
-docker-compose up -d
-```
-Запустить миграции, создать суперюзера, собрать статику:
-```
-docker-compose exec backend python manage.py migrate
+И в конце подгрузить список ингредиентов:
 
-docker-compose exec backend python manage.py createsuperuser
+```bash
+sudo docker exec -it <name или id контейнера backend> python manage.py loadjson --path "recipes/data/ingredients.json"
 
-docker-compose exec backend python manage.py collectstatic --no-input
-
-IP 84.201.155.233
-Логин администратора: admin
-Пароль: 123456
+```
