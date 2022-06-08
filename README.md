@@ -1,8 +1,6 @@
 # Foodgram - продуктовый помощник
 
 ## Доступен по адресу: **http://84.201.155.233/**
-### Администратор: почта - reviewer@reviewer.ru, пароль - 12345
-### Тестовый пользователь 1: Ivan1@yandex.ru/testuser1 и Тестовый пользователь 2: viki35@yandex.ru/testuser2 
 
 ## Стек технологий
 [![Python](https://img.shields.io/badge/-Python-464646?style=flat-square&logo=Python)](https://www.python.org/)
@@ -28,10 +26,11 @@
 Клонируйте репозиторий и перейдите в него в командной строке.
 Создайте и активируйте виртуальное окружение:
 ```
-git clone https://github.com/Evansmia/foodgram-project-react.git
+git clone https://github.com/Evansmia/foodgram.git
 ```
 Создайте файл `.env` командой `touch .env` и добавьте в него переменные окружения для работы с базой данных:
 ```bash
+SECRET_KEY="7%=jb(^ul=4cz=vfz(z-!z#zq7jq4s0ek++se9%tsyd(=@ye+_"
 DB_NAME=postgres # имя базы данных
 POSTGRES_USER=postgres # логин для подключения к базе данных
 POSTGRES_PASSWORD=postgres # пароль для подключения к БД (установите свой)
